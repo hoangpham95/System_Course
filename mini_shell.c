@@ -110,8 +110,9 @@ static void execute(int argc, char *argv[])
         pid_t thispid = fork();
         if (thispid == 0) {
             if ( -1 == close(STDOUT) ) perror("close"); /*close*/
-            fd = dup(pipe_fd[1]); /*set up empty STDOU to be pipe_fd[1] */
+            fd = dup(pipe_fd[1]); /*set up empty STDOUT to be pipe_fd[1] */
             if (-1 == fd ) perror("dup");
+            if ( fd != STDOUT) fprintf(stderr, "Pipe output not at STDOUT.\n");
             close(pipe_fd[0]); // never used
             close(pipe_fd[1]); // not needed anymore
 
@@ -119,10 +120,13 @@ static void execute(int argc, char *argv[])
                 argv[i] = NULL;
             }
             // execute
-            execvp(argv[0], argv);
+            if ( -1 == execvp(argv[0], argv) ) perror("execvp");
         } else if (fork() == 0) {
-            close(STDIN);
-            dup(pipe_fd[0]);
+            if ( -1 == close(STDIN) ) perror("close");
+            fd = dup(pipe_fd[0]);
+            if ( -1 == fd ) perror("dup");
+            if (fd != STDIN) fprintf(stderr, "Pipe input not at STDIN.\n");
+            close(pipe_fd[0]);
             close(pipe_fd[1]);
             // find index of the pipe and put the NULL
             argv[0] = snd;
@@ -131,9 +135,10 @@ static void execute(int argc, char *argv[])
                 argv[i] = NULL;
             }
             // execute
-            execvp(argv[0], argv);
+            if ( -1 == execvp(argv[0], argv) ) perror("execvp");
         } else {
             int status;
+            close(pipe_fd[0]);
             close(pipe_fd[1]);
             waitpid(thispid, &status, 0);
             waitpid(thispid, &status, 0);
