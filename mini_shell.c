@@ -109,9 +109,11 @@ static void execute(int argc, char *argv[])
         // fork
         pid_t thispid = fork();
         if (thispid == 0) {
-            close(STDOUT);
-            dup(pipe_fd[1]);
-            close(pipe_fd[1]);
+            if ( -1 == close(STDOUT) ) perror("close"); /*close*/
+            fd = dup(pipe_fd[1]); /*set up empty STDOU to be pipe_fd[1] */
+            if (-1 == fd ) perror("dup");
+            close(pipe_fd[0]); // never used
+            close(pipe_fd[1]); // not needed anymore
 
             for (i = pipe_idx; i < argc; i++) {
                 argv[i] = NULL;
