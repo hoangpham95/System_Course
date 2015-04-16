@@ -32,7 +32,7 @@ main:
     syscall
 
     #exit
-    li $v0, 10
+    li $v0, 10 #system call for exit
     syscall
 
 .text
@@ -52,9 +52,8 @@ factorial:
     addi $sp, $sp, 8 #allocate back a stack
     
     mul $v0, $v0, $a0 #multiple the return value with the input
-    jr $ra
+    jr $ra #exit
 
 return1:
     li $v0, 1 #the return value is 1
-    jr $ra
-    
+    jr $ra #exit    
