@@ -101,7 +101,7 @@ static void execute(int argc, char *argv[])
                 break;
             }
         } 
-        // create a pipe
+        // create a pipeline
         pipe(pipe_fd);
         
         // save the argument right behind the pipe
